@@ -2,10 +2,11 @@ const User = require('../model/User')
 const {StatusCodes} = require('http-status-codes')
 
 const jwt = require('jsonwebtoken')
+const {createJWT, validToken, attachCookies} = require('../utils')
 
 const login = async(req, res) => {
-    const {name, password} = req.body
-    const user = await User.findOne({name}) 
+    const {email, name, password} = req.body
+    const user = await User.findOne({email}) 
     if (!user) {
         throw new Error('no user found')
     }
@@ -13,35 +14,35 @@ const login = async(req, res) => {
     if (!passwordMatch) {
         throw new Error('wrong password')
     }
-    const token = jwt.sign(
-        {
-            userId: user._id,
-            name: user.name
-        },
-        process.env.JWT_SECRET,
-        {expiresIn: process.env.JWT_LIFETIME}
-    )
-    res.json({user: {
-        name: user.name,
-        id: user._id
-    }, token})
+    const tokenUser = {name: user.name, userId: user._id, role: user.role}
+    attachCookies({res, user: tokenUser})
+    res.status(StatusCodes.CREATED).json({user: tokenUser})
 }
 
 const signup = async(req, res) => {
-    const user = await User.create({...req.body}) 
-    const token = jwt.sign(
-        {
-            userId: user._id,
-            name: user.name
-        },
-        process.env.JWT_SECRET,
-        {expiresIn: process.env.JWT_LIFETIME}
-    )
-    res.json({user, token})
+    const {email, name, password} = req.body
+    const existingUser = await User.findOne({email})
+    if (existingUser) {
+        throw new Error('Email already existed')
+    }
+
+    const isFirstAccount = await User.countDocuments({}) === 0
+    const role = isFirstAccount ? 'Admin' : 'User'
+
+    const user = await User.create({
+        name, email, password, role
+    }) 
+    const tokenUser = {name: user.name, userId: user._id, role: user.role}
+    attachCookies({res, user: tokenUser})
+    res.status(StatusCodes.CREATED).json({user: tokenUser})
 }
 
 const logout = async (req, res) => {
-    res.send('logout')
+    res.cookie('token', 'logout', {
+        httpOnly: true,
+        expries: new Date(Date.now() + 10 * 1000) 
+    })
+    res.status(StatusCodes.OK).json({msg: 'logged out successfully'})
 }
 
 module.exports = {login, signup, logout}

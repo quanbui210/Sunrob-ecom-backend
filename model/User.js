@@ -6,11 +6,7 @@ const validator = require('validator')
 const UserSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'please provide username'],
-        unique: {
-            value: true,
-            message: 'username existed'
-        },
+        required: [true, 'please provide name'],
         minlength: 3,
         maxlength: 50
     },
@@ -29,7 +25,7 @@ const UserSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['Admin', 'User'],
-        default: ['User']
+        default: 'User'
     },
     password: {
         type: String,
@@ -40,9 +36,15 @@ const UserSchema = new mongoose.Schema({
 })
 
 UserSchema.pre('save', async function(){
-    const salt = await bcrypt.genSalt(10)
+    const salt = await bcrypt.genSalt(10) //rounds
     this.password = await bcrypt.hash(this.password, salt)
 })
+
+// UserSchema.methods.signJWT = async function () {
+//     await jwt.sign({
+
+//     })
+// }
 
 UserSchema.methods.comparePassword = async function (pw) {
     const isMatch = await bcrypt.compare(pw, this.password)
