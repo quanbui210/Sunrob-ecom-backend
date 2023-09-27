@@ -1,18 +1,34 @@
 const User = require('../model/User')
 const jwt = require('jsonwebtoken')
-const authenticate = (req, res, next) => {
-    const authHeader = req.headers.authorization
-    console.log(authHeader)
-    if (!authHeader || authHeader.startsWith('Bearer')){
-        throw new Error('Unauthorized')
+const {validToken} = require('../utils')
+const authenticateUser = async (req, res, next) => {
+    const token = req.signedCookies.token
+    if (!token) {
+        throw new Error('Invalid credentials')
     }
-    const token = authHeader.split(' ')[1]
     try {
-       const payload = jwt.verify(token, process.env.JWT_SECRET)
-       req.user = {userId: payload.userId, name: payload.name}
+        const payload = validToken({token})
+        console.log(payload)
+        req.user = {
+            name: payload.name,
+            userId: payload.userId,
+            role: payload.role
+        }
+        console.log(payload);
+        next()
     } catch (e) {
-        throw new Error('Unauthorized')
+        throw new Error('error')
+    }
+   
+}
+
+const authorizePermissions = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            throw new Error('Unauthorized')
+        }
+        next()
     }
 }
 
-module.exports = authenticate
+module.exports = {authenticateUser, authorizePermissions}

@@ -5,6 +5,7 @@ const express = require('express')
 const app = express()
 
 const authRouter = require('./routes/authRouter')
+const userRouter = require('./routes/userRouter')
 
 const authenticate = require('./middleware/authenticate')
 const notFoundMiddlware = require('./middleware/notFound')
@@ -32,6 +33,7 @@ app.get('/api/v1', (req, res) => {
 })
 
 app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/users', userRouter)
 
 app.use(notFoundMiddlware)
 app.use(errorHandlerMiddleware)
