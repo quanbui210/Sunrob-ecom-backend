@@ -1,5 +1,6 @@
 const User = require('../model/User')
 const {StatusCodes} = require('http-status-codes')
+const {createTokenUser, attachCookies, checkPermissions} = require('../utils')
 const getAllUsers = async(req, res) => {
     const allUsers = await User.find({role: "User"}).select("-password")
     if (allUsers.length < 1) {
@@ -12,13 +13,26 @@ const getOneUser = async(req, res) => {
     if (!user) {
         res.json({msg: `no user with id:${req.params.id} found`})
     }
+    checkPermissions(req.user, user._id)
     res.status(StatusCodes.OK).json({user})
 }
 const showCurrentUser = async(req, res) => {
     res.status(StatusCodes.OK).json({user: req.user})
 }
+
 const updateUser = async(req, res) => {
-    res.send(req.body)
+    const {email, name} = req.body
+    if (!name || !email) {
+        throw new Error('Please provide enough information')
+    }
+    const user = await User.findOne({_id: req.user.userId})
+    user.email = email
+    user.name = name
+    console.log(user);
+    await user.save()
+    const tokenUser = createTokenUser(user)
+    attachCookies({req, user: tokenUser})
+    res.status(StatusCodes.OK).json({user: tokenUser})
 }
 const updateUserPassword = async(req, res) => {
     const {oldPassword, newPassword} = req.body

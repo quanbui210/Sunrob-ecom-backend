@@ -1,8 +1,9 @@
 const User = require('../model/User')
 const {StatusCodes} = require('http-status-codes')
 
+
 const jwt = require('jsonwebtoken')
-const {createJWT, validToken, attachCookies} = require('../utils')
+const {createJWT, validToken, attachCookies, createTokenUser} = require('../utils')
 
 const login = async(req, res) => {
     const {email, name, password} = req.body
@@ -14,7 +15,7 @@ const login = async(req, res) => {
     if (!passwordMatch) {
         throw new Error('wrong password')
     }
-    const tokenUser = {name: user.name, userId: user._id, role: user.role}
+    const tokenUser = createTokenUser(user)
     attachCookies({res, user: tokenUser})
     res.status(StatusCodes.CREATED).json({user: tokenUser})
 }
@@ -32,7 +33,7 @@ const signup = async(req, res) => {
     const user = await User.create({
         name, email, password, role
     }) 
-    const tokenUser = {name: user.name, userId: user._id, role: user.role}
+    const tokenUser = createTokenUser(user)
     attachCookies({res, user: tokenUser})
     res.status(StatusCodes.CREATED).json({user: tokenUser})
 }
