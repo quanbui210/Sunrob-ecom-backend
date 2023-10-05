@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 
+
 const ProductSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -24,12 +25,9 @@ const ProductSchema = new mongoose.Schema({
         type: Number,
         required: [true,'please provide price']
     },
-    reviews:{
-        type: Array
-    },
     category: {
         type: String,
-        enum: ['programmable', 'not-programmable', 'education']
+        enum: ['programmable', 'non-programmable', 'education']
     },
     freeShipping: {
         type: Boolean
@@ -49,9 +47,17 @@ const ProductSchema = new mongoose.Schema({
         required: true
     },
     featured: {
-        type: Boolean
+        type: Boolean,
+        default: false,
     }
-}, {timestamps: true})
+}, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}})
+
+ProductSchema.virtual('reviews', {
+    ref: 'Review',
+    localField: '_id',
+    foreignField: 'product',
+    justOne: false
+})
 
 
 module.exports = mongoose.model('Product', ProductSchema)

@@ -1,5 +1,7 @@
 const Product = require('../model/Product')
 const {StatusCodes} = require('http-status-codes')
+const cloudinary = require('cloudinary').v2
+const fs = require('fs')
 const path = require('path')
 const createProduct = async(req, res) => {
     req.body.user = req.user.userId
@@ -29,20 +31,20 @@ const deleteProduct = async(req, res) => {
 }
 
 const getAllProducts = async(req, res) => {
-    const products = await Product.find({})
+    const products = await Product.find({}).populate('reviews')
     res.status(StatusCodes.OK).json({products})
 }
 
 const getOneProduct = async(req, res) => {
     const {id} = req.params
-    const product = await Product.findOne({_id: id})
+    const product = await Product.findOne({_id: id}).populate('reviews')
     if (!product) {
         throw new Error('no product found')
     }
     res.status(StatusCodes.OK).json({product})
 }
 
-const uploadImage = async(req, res) => {
+const uploadImageLocal = async(req, res) => {
     if (!req.files) {
         throw new Error('please provide images')
     }
@@ -58,6 +60,17 @@ const uploadImage = async(req, res) => {
     const imgPath = path.join(__dirname, '../public/product-images/' + `${productImg.name}`)
     await productImg.mv(imgPath)
     res.status(StatusCodes.OK).json({image: `/product-images/${productImg.name}`})
+}
+const uploadImage = async (req, res) => {
+    const productImg = req.files.image.tempFilePath
+    let result = await cloudinary.uploader.upload(productImg,{
+        use_filename: true,
+        unique_filename: false,
+        overwrite: true,
+        folder: 'Sunrob'
+    })
+    fs.unlinkSync(productImg)
+    return res.status(StatusCodes.OK).json({img: {src: result.secure_url}})
 }
 
 module.exports = {

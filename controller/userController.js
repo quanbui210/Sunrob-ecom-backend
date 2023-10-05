@@ -56,8 +56,6 @@ const updateUserPassword = async(req, res) => {
 const deleteUser = async(req, res) => {
     res.send('Ban user')
 }
-
-
 module.exports = {
     getAllUsers, getOneUser, showCurrentUser,
     updateUser, updateUserPassword, deleteUser
