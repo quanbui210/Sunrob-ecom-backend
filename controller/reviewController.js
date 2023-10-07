@@ -38,17 +38,16 @@ const createReview = async(req, res) => {
     req.body.user = req.user.userId
     const newReview = await Review.create(review)
     // validProduct.reviews.push(newReview)
-    const totalReviews = validProduct.reviews.length;
-    const sumRatings = validProduct.reviews.reduce((sum, review) => sum + review.rating, 0);
-    validProduct.averageRating = sumRatings / totalReviews;
-    await validProduct.save()
+    // const totalReviews = validProduct.reviews.length;
+    // const sumRatings = validProduct.reviews.reduce((sum, review) => sum + review.rating, 0);
+    // validProduct.averageRating = sumRatings / totalReviews;
+    // await validProduct.save()
     res.status(StatusCodes.CREATED).json(newReview)
 }
 
 const updateReview = async(req, res) => {
     const {id} = req.params
     const {rating, title, comment} = req.body
-    
     const review = await Review.findOne({_id: id})
     checkPermissions(req.user, review.user)
     review.rating = rating
