@@ -32,7 +32,10 @@ cloudinary.config({
   })
 
 const connectDB = require('./db/connect')
-
+const corsOptions = {
+    origin: 'https://sunrob-webshop.onrender.com/',
+    credentials: true, // Enable credentials (cookies)
+}
 app.set('trust proxy', 1)
 app.use(rateLimiter({
     windowMs: 15 * 60 * 1000,
@@ -41,7 +44,7 @@ app.use(rateLimiter({
 app.use(helmet())
 app.use(mongoSanitize())
 app.use(express.json())
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(cookieParser(process.env.JWT_SECRET))
 
 app.use(express.static('./public'))

@@ -11,15 +11,17 @@ const validToken = ({token}) => {
    return jwt.verify(token, process.env.JWT_SECRET)
 }
 
-const attachCookies = ({res, user}) => {
-    const token = createJWT({payload: user})
-    const oneDay = 10000 * 60 * 24
+const attachCookies = ({req, res, user }) => {
+    const token = createJWT({ payload: user });
+    const oneDay = 1000 * 60 * 24;
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
     res.cookie('token', token, {
         httpOnly: true,
         expires: new Date(Date.now() + oneDay),
-        secure: process.env.NODE_ENV === 'production',
-        signed: true
-    })
-}
+        signed: true,
+        secure: isSecure, // Set secure to true for HTTPS if the connection is secure
+        sameSite: 'None', // Allow cross-domain cookies
+    });
+};
 
 module.exports = {createJWT, validToken, attachCookies}

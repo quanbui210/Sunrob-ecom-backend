@@ -3,6 +3,7 @@ const {StatusCodes} = require('http-status-codes')
 const cloudinary = require('cloudinary').v2
 const fs = require('fs')
 const path = require('path')
+const { log } = require('console')
 const createProduct = async(req, res) => {
     req.body.user = req.user.userId
     const newProduct = await Product.create(req.body)
@@ -62,6 +63,7 @@ const uploadImageLocal = async(req, res) => {
     res.status(StatusCodes.OK).json({image: `/product-images/${productImg.name}`})
 }
 const uploadImage = async (req, res) => {
+    console.log(req.files)
     const productImg = req.files.image.tempFilePath
     let result = await cloudinary.uploader.upload(productImg,{
         use_filename: true,

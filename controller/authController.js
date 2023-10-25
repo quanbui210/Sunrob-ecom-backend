@@ -16,7 +16,7 @@ const login = async(req, res) => {
         throw new Error('wrong password')
     }
     const tokenUser = createTokenUser(user)
-    attachCookies({res, user: tokenUser})
+    attachCookies({req, res, user: tokenUser})
     res.status(StatusCodes.CREATED).json({user: tokenUser})
 }
 
@@ -34,7 +34,7 @@ const signup = async(req, res) => {
         name, email, password, role
     }) 
     const tokenUser = createTokenUser(user)
-    attachCookies({res, user: tokenUser})
+    attachCookies({req, res, user: tokenUser})
     res.status(StatusCodes.CREATED).json({user: tokenUser})
 }
 
