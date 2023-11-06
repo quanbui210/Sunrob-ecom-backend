@@ -9,6 +9,7 @@ const fakeStripeAPI = async ({amount, currency}) => {
 }
 
 const getAllOrders = async (req, res) => {
+    console.log('all orders');
     const allOrders = await Order.find({})
     res.status(StatusCodes.OK).json(allOrders)
 }
@@ -27,7 +28,6 @@ const getCurrentUserOrders = async (req, res) => {
 }
 const createOrder = async (req, res) => {
     const {items: cartItems, tax, shippingFee} = req.body
-    console.log(req.body.items[0].product);
     if (!cartItems || cartItems.length < 1) {
         throw new Error ('no items provided')
     }
@@ -37,7 +37,7 @@ const createOrder = async (req, res) => {
     let orderItems = []
     let subtotal = 0
     for (let item of cartItems) {
-        const dbProduct = await Product.findOne({_id: item.product})
+        const dbProduct = await Product.findOne({_id: item.id})
         if (!dbProduct) {
             throw new Error(`No product found`)
         }
@@ -47,7 +47,7 @@ const createOrder = async (req, res) => {
             name,
             price,
             image,
-            product:_id
+            id:_id
         }
         orderItems = [...orderItems, singleOrderItem]
         subtotal += item.quantity * price
@@ -58,7 +58,6 @@ const createOrder = async (req, res) => {
     const paymentIntent = await fakeStripeAPI({ 
         amount: total, currency: 'usd'
     })
-    console.log(Order, 'Order');
     const order = await Order.create({
         orderItems, 
         total, 

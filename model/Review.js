@@ -39,7 +39,7 @@ ReviewSchema.statics.calculateAvgRating = async function (productId) {
     ])
     try {
         await this.model('Product').findOneAndUpdate({_id: productId}, {
-            averageRating: Math.ceil(result[0]?.averageRating || 0),
+            averageRating: parseFloat(result[0]?.averageRating.toFixed(1) || 0),
             numOfReviews: Math.ceil(result[0]?.numOfReviews || 0)
         }) //avoid being empty array if no reviews
     } catch (e) {

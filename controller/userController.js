@@ -28,7 +28,6 @@ const updateUser = async(req, res) => {
     const user = await User.findOne({_id: req.user.userId})
     user.email = email
     user.name = name
-    console.log(user);
     await user.save()
     const tokenUser = createTokenUser(user)
     attachCookies({req, user: tokenUser})
@@ -36,12 +35,11 @@ const updateUser = async(req, res) => {
 }
 const updateUserPassword = async(req, res) => {
     const {oldPassword, newPassword} = req.body
-    console.log(oldPassword, newPassword, req.user.userId)
     const user = await User.findOne({_id: req.user.userId})
     
     if (!oldPassword || !newPassword) {
         throw new Error('please provide enough info')
-    }    console.log(user)
+    } 
     const passwordMatches = await user.comparePassword(oldPassword)
     if (!passwordMatches) {
         throw new Error('password does not match')

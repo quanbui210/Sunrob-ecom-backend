@@ -13,7 +13,7 @@ const validToken = ({token}) => {
 
 const attachCookies = ({req, res, user }) => {
     const token = createJWT({ payload: user });
-    const oneDay = 1000 * 60 * 24;
+    const oneDay = 10000 * 60 * 24;
     const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
     console.log(isSecure, req.secure);
     res.cookie('token', token, {
@@ -21,7 +21,6 @@ const attachCookies = ({req, res, user }) => {
         expires: new Date(Date.now() + oneDay),
         signed: true,
         secure: isSecure, // Set secure to true for HTTPS if the connection is secure
-        sameSite: 'None', // Allow cross-domain cookies
     });
 };
 

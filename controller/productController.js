@@ -43,7 +43,7 @@ const getOneProduct = async(req, res) => {
         throw new Error('no product found')
     }
     res.status(StatusCodes.OK).json({product})
-}
+} 
 
 const uploadImageLocal = async(req, res) => {
     if (!req.files) {

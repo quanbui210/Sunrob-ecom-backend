@@ -1,5 +1,6 @@
 const Review = require('../model/Review')
 const Product = require('../model/Product')
+const Order = require('../model/Order')
 const {StatusCodes} = require('http-status-codes')
 const checkPermissions = require('../utils/checkPermissions')
 
@@ -25,6 +26,18 @@ const createReview = async(req, res) => {
     const review = req.body
     const {product: productId} = req.body
     const validProduct = await Product.findOne({_id: productId})
+    const hasOrderedProduct = await Order.findOne({
+        user: req.user.userId,
+        'orderItems': {
+            $elemMatch: {
+                product: productId
+            }
+        }
+    });
+    console.log(req.user.userId)
+    if (!hasOrderedProduct) {
+        throw new Error('You have not bought this product yet');
+    }
     if (!validProduct) {
         throw new Error('no product found')
     }
@@ -37,11 +50,6 @@ const createReview = async(req, res) => {
     }
     req.body.user = req.user.userId
     const newReview = await Review.create(review)
-    // validProduct.reviews.push(newReview)
-    // const totalReviews = validProduct.reviews.length;
-    // const sumRatings = validProduct.reviews.reduce((sum, review) => sum + review.rating, 0);
-    // validProduct.averageRating = sumRatings / totalReviews;
-    // await validProduct.save()
     res.status(StatusCodes.CREATED).json(newReview)
 }
 
@@ -69,7 +77,7 @@ const deleteReview = async(req, res) => {
 }
 const getSingleProductReviews = async (req, res) => {
     const {id: productId} = req.params
-    const reviews = await Review.find({product: productId})
+    const reviews = await Review.find({product: productId}).populate({path: 'user', select: 'name email'})
     res.status(StatusCodes.OK).json(reviews)
 }
 
