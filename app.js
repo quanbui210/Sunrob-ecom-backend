@@ -10,9 +10,9 @@ const productRouter = require('./routes/productRouter')
 const reviewRouter = require('./routes/reviewRouter')
 const orderRouter = require('./routes/orderRouter')
 
-const authenticate = require('./middleware/authenticate')
 const notFoundMiddlware = require('./middleware/notFound')
 const errorHandlerMiddleware = require('./middleware/error-handler')
+const checkTokenExist = require('./middleware/checkToken')
 
 const morgan  = require('morgan')
 const cookieParser = require('cookie-parser')
@@ -53,6 +53,7 @@ app.use('/api/v1/users', userRouter)
 app.use('/api/v1/products', productRouter)
 app.use('/api/v1/reviews', reviewRouter)
 app.use('/api/v1/orders', orderRouter)
+
 
 app.use(notFoundMiddlware)
 app.use(errorHandlerMiddleware)

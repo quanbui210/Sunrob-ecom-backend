@@ -1,8 +1,9 @@
 const User = require('../model/User')
 const {StatusCodes} = require('http-status-codes')
 const {createTokenUser, attachCookies, checkPermissions} = require('../utils')
+const Order = require('../model/Order')
 const getAllUsers = async(req, res) => {
-    const allUsers = await User.find({role: "User"}).select("-password")
+    const allUsers = await User.find({role: "User"}).select("-password").populate('orders')
     if (allUsers.length < 1) {
         res.json({msg: "no user found"})
     }
@@ -10,6 +11,7 @@ const getAllUsers = async(req, res) => {
 }
 const getOneUser = async(req, res) => {
     const user = await User.findOne({_id: req.params.id}).select("-password")
+    user.orders = await Order.find({user: req.user.userId})
     if (!user) {
         res.json({msg: `no user with id:${req.params.id} found`})
     }

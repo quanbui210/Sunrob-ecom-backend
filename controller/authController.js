@@ -46,4 +46,20 @@ const logout = async (req, res) => {
     res.status(StatusCodes.OK).json({msg: 'logged out successfully'})
 }
 
-module.exports = {login, signup, logout}
+// const checkToken = async (req, res) => {
+//     const token = req.signedCookies.token
+//     if (token || token !== 'logout') {
+//         res.status(StatusCodes.OK).json({token, authenticated: true})
+//     }
+// }
+
+const checkToken = async (req, res) => {
+    const token = req.signedCookies.token
+    if (!token || token === 'logout') {
+        res.status(StatusCodes.OK).json({message: 'No TOKEN', authenticated: false})
+    } else {
+        res.status(StatusCodes.OK).json({message: 'Authenticated', token, authenticated: true})
+    }
+}
+
+module.exports = {login, signup, logout, checkToken}

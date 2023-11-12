@@ -2,6 +2,9 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
+const Order = require('../model/Order')
+
+
 
 const UserSchema = new mongoose.Schema({
     name: {
@@ -31,7 +34,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide password'],
         minlength: 5
-    }
+    },
+    orders: [{
+        type: mongoose.Types.ObjectId,
+        ref: 'Order'
+    }]
 })
 
 UserSchema.pre('save', async function(){
@@ -40,11 +47,12 @@ UserSchema.pre('save', async function(){
     this.password = await bcrypt.hash(this.password, salt)
 })
 
-// UserSchema.methods.signJWT = async function () {
-//     await jwt.sign({
-
-//     })
-// }
+// UserSchema.virtual('orders', {
+//     ref: 'Order',
+//     localField: '_id',
+//     foreignField:'user',
+//     justOne: false
+// })
 
 UserSchema.methods.comparePassword = async function (pw) {
     const isMatch = await bcrypt.compare(pw, this.password)

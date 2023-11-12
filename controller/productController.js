@@ -32,6 +32,7 @@ const deleteProduct = async(req, res) => {
 }
 
 const getAllProducts = async(req, res) => {
+    const token = req.signedCookies.token
     const products = await Product.find({}).populate('reviews')
     res.status(StatusCodes.OK).json({products})
 }
@@ -75,11 +76,12 @@ const uploadImage = async (req, res) => {
     return res.status(StatusCodes.OK).json({img: {src: result.secure_url}})
 }
 
+
 module.exports = {
     createProduct,
     updateProduct,
     deleteProduct,
     getAllProducts,
     getOneProduct,
-    uploadImage
+    uploadImage,
 }
