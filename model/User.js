@@ -38,7 +38,17 @@ const UserSchema = new mongoose.Schema({
     orders: [{
         type: mongoose.Types.ObjectId,
         ref: 'Order'
-    }]
+    }],
+    verificationToken: {
+        type: String
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verified: {
+        type: Date
+    }
 })
 
 UserSchema.pre('save', async function(){
