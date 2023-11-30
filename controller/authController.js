@@ -34,8 +34,8 @@ const login = async(req, res) => {
         return
     }
     refreshToken = crypto.randomBytes(40).toString('hex')
-    const userAgent = req.headers['user-agent']
-    const ip = req.ip
+    const userAgent = req.headers['user-agent'] //identify client device/browser
+    const ip = req.ip //store client IP address, identify source of request
     const userToken = {refreshToken, ip, userAgent, user: user._id}
     await Token.create(userToken)
     attachCookies({ res, user: tokenUser, refreshToken})
@@ -75,10 +75,10 @@ const logout = async (req, res) => {
 
 const checkToken = async (req, res) => {
     const {accessToken, refreshToken} = req.signedCookies
-    if ((!accessToken || accessToken === 'logout') && (!refreshToken || refreshToken === 'logout')) {
+    if ( !refreshToken || refreshToken === 'logout') {
         res.status(StatusCodes.OK).json({message: 'No TOKEN', authenticated: false})
     } else {
-        res.status(StatusCodes.OK).json({message: 'Authenticated', token: accessToken, authenticated: true})
+        res.status(StatusCodes.OK).json({message: 'Authenticated', authenticated: true})
     }
 }
 
