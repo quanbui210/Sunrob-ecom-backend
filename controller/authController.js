@@ -4,7 +4,7 @@ const crypto = require('crypto')
 const Token = require('../model/Token')
 
 const jwt = require('jsonwebtoken')
-const {createJWT, validToken, attachCookies, createTokenUser} = require('../utils')
+const {createJWT, validToken, attachCookies, createTokenUser, sendResetPasswordEmail} = require('../utils')
 
 const login = async(req, res) => {
     const {email, password} = req.body
@@ -82,4 +82,45 @@ const checkToken = async (req, res) => {
     }
 }
 
-module.exports = {login, signup, logout, checkToken}
+const forgotPassword = async(req, res) => {
+    const {email} = req.body
+    const existingUser = await User.findOne({email})
+    const passwordToken = crypto.randomBytes(70).toString('hex')
+    if (existingUser) {
+        const origin = 'http://localhost:3000'
+        await sendResetPasswordEmail({
+            email,
+            token: passwordToken,
+            origin
+        })
+        const tenMins = 1000 * 60 * 10
+        const passwordTokenExp = new Date(Date.now()+ tenMins)
+        existingUser.passwordToken = passwordToken
+        existingUser.passwordTokenExpiryDate = passwordTokenExp
+        await existingUser.save()
+    }
+    res.status(200).json({msg: 'Check your email', token: passwordToken})
+}
+
+const resetPassword = async(req, res) => {
+    const {email, password, token} = req.body
+    if (!token || !email || !password) {
+        throw new Error('Please provide all values')
+      }
+    const user = await User.findOne({email})
+    if (user) {
+        console.log('user');
+        console.log(token, user.passwordToken);
+        if (token === user.passwordToken) {
+            user.password = password
+            user.passwordToken = null
+            user.passwordTokenExpiryDate = null
+            await user.save()
+        }
+    }
+    res.status(200).json({
+        msg: 'password changed'
+    })
+}
+
+module.exports = {login, signup, logout, checkToken, forgotPassword, resetPassword}
